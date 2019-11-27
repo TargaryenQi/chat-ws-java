@@ -1,11 +1,11 @@
-package com.jasofalcon.chat;
+package edu.bu.cs622.chat;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jasofalcon.message.Message;
-import com.jasofalcon.message.MessageType;
-import com.jasofalcon.user.User;
+import edu.bu.cs622.message.Message;
+import edu.bu.cs622.message.MessageType;
+import edu.bu.cs622.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.WebSocket;
@@ -24,17 +24,17 @@ public class ChatServer extends WebSocketServer {
 
     private HashMap<WebSocket, User> users;
 
-    private Set<WebSocket> conns;
+    private Set<WebSocket> connections;
 
     private ChatServer(int port) {
         super(new InetSocketAddress(port));
-        conns = new HashSet<>();
+        connections = new HashSet<>();
         users = new HashMap<>();
     }
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-        conns.add(webSocket);
+        connections.add(webSocket);
 
         logger.info("Connection established from: " + webSocket.getRemoteSocketAddress().getHostString());
         System.out.println("New connection from " + webSocket.getRemoteSocketAddress().getAddress().getHostAddress());
@@ -42,7 +42,7 @@ public class ChatServer extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        conns.remove(conn);
+        connections.remove(conn);
         // When connection is closed, remove the user.
         try {
             removeUser(conn);
@@ -69,6 +69,7 @@ public class ChatServer extends WebSocketServer {
                     break;
                 case TEXT_MESSAGE:
                     broadcastMessage(msg);
+                    processAndBroadcastMessage(msg);
             }
 
             System.out.println("Message from user: " + msg.getUser() + ", text: " + msg.getData() + ", type:" + msg.getType());
@@ -83,17 +84,35 @@ public class ChatServer extends WebSocketServer {
     public void onError(WebSocket conn, Exception ex) {
 
         if (conn != null) {
-            conns.remove(conn);
+            connections.remove(conn);
         }
         assert conn != null;
         System.out.println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
+    }
+
+    private void processAndBroadcastMessage(Message msg) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String content = msg.getData();
+            msg.setData(content + "is processed!");
+            User user = msg.getUser();
+            String userName = msg.getUser().getName();
+            user.setName("Answer for " + userName);
+            String messageJson = mapper.writeValueAsString(msg);
+            for (WebSocket sock : connections) {
+                sock.send(messageJson);
+            }
+            user.setName(userName);
+        } catch (JsonProcessingException e) {
+            logger.error("Cannot convert message to json.");
+        }
     }
 
     private void broadcastMessage(Message msg) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String messageJson = mapper.writeValueAsString(msg);
-            for (WebSocket sock : conns) {
+            for (WebSocket sock : connections) {
                 sock.send(messageJson);
             }
         } catch (JsonProcessingException e) {
@@ -103,6 +122,7 @@ public class ChatServer extends WebSocketServer {
 
     private void addUser(User user, WebSocket conn) throws JsonProcessingException {
         users.put(conn, user);
+
         acknowledgeUserJoined(user, conn);
         broadcastUserActivityMessage(MessageType.USER_JOINED);
     }

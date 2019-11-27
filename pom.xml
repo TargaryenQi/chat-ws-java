@@ -21,7 +21,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.jasofalcon.chat.ChatServer</mainClass>
+                            <mainClass>edu.bu.cs622.chat.ChatServer</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

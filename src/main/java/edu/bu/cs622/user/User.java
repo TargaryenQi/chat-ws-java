@@ -1,4 +1,4 @@
-package com.jasofalcon.user;
+package edu.bu.cs622.user;
 
 import java.io.Serializable;
 import java.util.Objects;

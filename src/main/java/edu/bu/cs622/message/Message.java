@@ -1,8 +1,7 @@
-package com.jasofalcon.message;
+package edu.bu.cs622.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.jasofalcon.message.MessageType;
-import com.jasofalcon.user.User;
+import edu.bu.cs622.user.User;
 
 import java.io.Serializable;
 
