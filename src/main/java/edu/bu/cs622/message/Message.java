@@ -11,6 +11,7 @@ public class Message implements Serializable{
     private User user;
     private MessageType type;
     private String data;
+    private int resultNumber;
 
     public MessageType getType() {
         return type;

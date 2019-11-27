@@ -3,8 +3,12 @@ package edu.bu.cs622.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.bu.cs622.db.MongoDB;
+import edu.bu.cs622.fileprocessor.MergeFile;
+import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
+import edu.bu.cs622.search.BruteForce;
 import edu.bu.cs622.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +18,7 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +35,29 @@ public class ChatServer extends WebSocketServer {
         super(new InetSocketAddress(port));
         connections = new HashSet<>();
         users = new HashMap<>();
+    }
+
+    public static void main(String[] args) {
+        // Merge all the data to "merged.txt".
+        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
+
+        //Preparse the data to a dictionary.
+        //      Key: Sensor Name.
+        //      Value: an arrayList of the JSON string of particular Sensor
+        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile.preParseFile("MergedData/allDaysData.txt");
+
+        // Create a mongoDB
+        MongoDB mongoDB = new MongoDB("smartwatch");
+        // Transfer all the data to the mongoDB
+        mongoDB.transferDataToDatabase(sensorDictionary);
+
+        int port;
+        try {
+            port = Integer.parseInt(System.getenv("PORT"));
+        } catch (NumberFormatException nfe) {
+            port = 9000;
+        }
+        new ChatServer(port).start();
     }
 
     @Override
@@ -93,12 +121,11 @@ public class ChatServer extends WebSocketServer {
     private void processAndBroadcastMessage(Message msg) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            String content = msg.getData();
-            msg.setData(content + "is processed!");
             User user = msg.getUser();
             String userName = msg.getUser().getName();
             user.setName("Answer for " + userName);
-            String messageJson = mapper.writeValueAsString(msg);
+            Message messageProcessed = messageProcessor(msg);
+            String messageJson = mapper.writeValueAsString(messageProcessed);
             for (WebSocket sock : connections) {
                 sock.send(messageJson);
             }
@@ -106,6 +133,12 @@ public class ChatServer extends WebSocketServer {
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
         }
+    }
+
+    private Message messageProcessor(Message msg) {
+        ArrayList<String> result = BruteForce.search(msg.getData());
+        msg.setData(result.toString());
+        return msg;
     }
 
     private void broadcastMessage(Message msg) {
@@ -149,15 +182,4 @@ public class ChatServer extends WebSocketServer {
         newMessage.setType(messageType);
         broadcastMessage(newMessage);
     }
-
-    public static void main(String[] args) {
-        int port;
-        try {
-            port = Integer.parseInt(System.getenv("PORT"));
-        } catch (NumberFormatException nfe) {
-            port = 9000;
-        }
-        new ChatServer(port).start();
-    }
-
 }
