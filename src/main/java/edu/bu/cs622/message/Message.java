@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import edu.bu.cs622.user.User;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Message implements Serializable{
@@ -11,7 +13,7 @@ public class Message implements Serializable{
     private User user;
     private MessageType type;
     private String data;
-    private int resultNumber;
+    private HashMap<SearchType,SearchResult> searchResults = new HashMap<>();
 
     public MessageType getType() {
         return type;
@@ -36,4 +38,10 @@ public class Message implements Serializable{
     public String getData(){
         return data;
     }
+
+    public void setSearchResults(SearchResult searchResult) {
+        this.searchResults.put(searchResult.getSearchType(),searchResult);
+    }
+
+
 }

@@ -8,7 +8,10 @@ import edu.bu.cs622.fileprocessor.MergeFile;
 import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
+import edu.bu.cs622.message.SearchResult;
+import edu.bu.cs622.message.SearchType;
 import edu.bu.cs622.search.BruteForce;
+import edu.bu.cs622.search.Lucene;
 import edu.bu.cs622.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,28 +63,15 @@ public class ChatServer extends WebSocketServer {
         new ChatServer(port).start();
     }
 
-    @Override
-    public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-        connections.add(webSocket);
-
-        logger.info("Connection established from: " + webSocket.getRemoteSocketAddress().getHostString());
-        System.out.println("New connection from " + webSocket.getRemoteSocketAddress().getAddress().getHostAddress());
-    }
-
-    @Override
-    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        connections.remove(conn);
-        // When connection is closed, remove the user.
-        try {
-            removeUser(conn);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        logger.info("Connection closed to: " + conn.getRemoteSocketAddress().getHostString());
-        System.out.println("Closed connection to " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
-    }
-
+    /**
+     * On receive different type message and react with different actions.
+     *      USER_JOINED: add user and connection;
+     *      USER_LEFT: remove user and connection;
+     *      TEXT_MESSAGE: broadcast msg, search msg and broadcast search result.
+     *
+     * @param conn connection between client and server.
+     * @param message message received from client.
+     */
     @Override
     public void onMessage(WebSocket conn, String message) {
         ObjectMapper mapper = new ObjectMapper();
@@ -108,16 +98,10 @@ public class ChatServer extends WebSocketServer {
         }
     }
 
-    @Override
-    public void onError(WebSocket conn, Exception ex) {
-
-        if (conn != null) {
-            connections.remove(conn);
-        }
-        assert conn != null;
-        System.out.println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
-    }
-
+    /**
+     * Search msg with different type search and broadcast the msg with search result.
+     * @param msg msg to be searched.
+     */
     private void processAndBroadcastMessage(Message msg) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -132,15 +116,33 @@ public class ChatServer extends WebSocketServer {
             user.setName(userName);
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private Message messageProcessor(Message msg) {
-        ArrayList<String> result = BruteForce.search(msg.getData());
-        msg.setData(result.toString());
+    /**
+     * Search with different type search.
+     * @param msg msg to search.
+     * @return msg with search results from different type search.
+     * @throws Exception exceptions.
+     */
+    private Message messageProcessor(Message msg) throws Exception {
+        // Brute force search.
+        SearchResult bruteForceSearchResult = BruteForce.search(msg.getData());
+        msg.setSearchResults(bruteForceSearchResult);
+
+        // Lucene Search.
+        SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt").query(msg.getData());
+        msg.setSearchResults(luceneSearchResult);
+
         return msg;
     }
 
+    /**
+     * Broadcast msg before process it.
+     * @param msg msg to broadcast.
+     */
     private void broadcastMessage(Message msg) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -181,5 +183,36 @@ public class ChatServer extends WebSocketServer {
         newMessage.setData(data);
         newMessage.setType(messageType);
         broadcastMessage(newMessage);
+    }
+
+    @Override
+    public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
+        connections.add(webSocket);
+
+        logger.info("Connection established from: " + webSocket.getRemoteSocketAddress().getHostString());
+        System.out.println("New connection from " + webSocket.getRemoteSocketAddress().getAddress().getHostAddress());
+    }
+
+    @Override
+    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+        connections.remove(conn);
+        // When connection is closed, remove the user.
+        try {
+            removeUser(conn);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        logger.info("Connection closed to: " + conn.getRemoteSocketAddress().getHostString());
+        System.out.println("Closed connection to " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
+    }
+
+    @Override
+    public void onError(WebSocket conn, Exception ex) {
+        if (conn != null) {
+            connections.remove(conn);
+        }
+        assert conn != null;
+        System.out.println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
     }
 }
