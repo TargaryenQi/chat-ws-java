@@ -5,6 +5,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import edu.bu.cs622.message.SearchResult;
 import org.bson.Document;
 import org.json.JSONObject;
 
@@ -19,13 +20,13 @@ public class MongoDB {
   private MongoClient mongoClient;
   private MongoDatabase mongoDatabase;
 
-  public MongoDB(String databaseName){
+  public MongoDB(String databaseName) {
     Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
     mongoLogger.setLevel(Level.SEVERE);
     // initialize the client object
     mongoClient = new MongoClient();
     // get the 'test' dataset
-    mongoDatabase = mongoClient.getDatabase( databaseName );
+    mongoDatabase = mongoClient.getDatabase(databaseName);
     System.out.println("[Mongo]: The client is connected.");
     System.out.println("[Mongo]: " + mongoDatabase.getName() + " database is initialized.");
   }

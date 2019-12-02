@@ -106,13 +106,18 @@ public class ChatServer extends WebSocketServer {
         ObjectMapper mapper = new ObjectMapper();
         try {
             User user = msg.getUser();
+            // Get the name of the user who make the query.
             String userName = msg.getUser().getName();
+            // Note the title to show which user ask for the query.
             user.setName("Answer for " + userName);
+            // Search message with different type search.
             Message messageProcessed = messageProcessor(msg);
+
             String messageJson = mapper.writeValueAsString(messageProcessed);
             for (WebSocket sock : connections) {
                 sock.send(messageJson);
             }
+
             user.setName(userName);
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
@@ -155,6 +160,12 @@ public class ChatServer extends WebSocketServer {
         }
     }
 
+    /**
+     * Add user.
+     * @param user user to add.
+     * @param conn connection to create.
+     * @throws JsonProcessingException exception.
+     */
     private void addUser(User user, WebSocket conn) throws JsonProcessingException {
         users.put(conn, user);
 
@@ -162,11 +173,22 @@ public class ChatServer extends WebSocketServer {
         broadcastUserActivityMessage(MessageType.USER_JOINED);
     }
 
+    /**
+     * Remove user.
+     * @param conn connection to remove.
+     * @throws JsonProcessingException exception.
+     */
     private void removeUser(WebSocket conn) throws JsonProcessingException {
         users.remove(conn);
         broadcastUserActivityMessage(MessageType.USER_LEFT);
     }
 
+    /**
+     * Inform the client that the User has been added to server.
+     * @param user user that added.
+     * @param conn connection that established.
+     * @throws JsonProcessingException exceptions.
+     */
     private void acknowledgeUserJoined(User user, WebSocket conn) throws JsonProcessingException {
         Message message = new Message();
         message.setType(MessageType.USER_JOINED_ACK);
@@ -174,8 +196,12 @@ public class ChatServer extends WebSocketServer {
         conn.send(new ObjectMapper().writeValueAsString(message));
     }
 
+    /**
+     * Broadcast the user activity.
+     * @param messageType messageType which represent the User activity.
+     * @throws JsonProcessingException exception.
+     */
     private void broadcastUserActivityMessage(MessageType messageType) throws JsonProcessingException {
-
         Message newMessage = new Message();
 
         ObjectMapper mapper = new ObjectMapper();
