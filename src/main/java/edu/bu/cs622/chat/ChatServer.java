@@ -4,14 +4,13 @@ package edu.bu.cs622.chat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.bu.cs622.db.MongoDB;
-import edu.bu.cs622.fileprocessor.MergeFile;
-import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
 import edu.bu.cs622.message.SearchResult;
 import edu.bu.cs622.search.BruteForce;
 import edu.bu.cs622.search.Lucene;
 import edu.bu.cs622.user.User;
+import org.apache.commons.validator.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.WebSocket;
@@ -41,17 +40,18 @@ public class ChatServer extends WebSocketServer {
 
     public static void main(String[] args) throws IOException {
         // Merge all the data to "merged.txt".
-        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
+//        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
 
         //Preparse the data to a dictionary.
         //      Key: Sensor Name.
         //      Value: an arrayList of the JSON string of particular Sensor
-        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile.preParseFile("MergedData/allDaysData.txt");
+//        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile.preParseFile("MergedData/allDaysData.txt");
 
         // Create a mongoDB
-        MongoDB mongoDB = new MongoDB("smartwatch");
+//        MongoDB mongoDB = new MongoDB("smartwatch");
         // Transfer all the data to the mongoDB
-        mongoDB.transferDataToDatabase(sensorDictionary);
+//        mongoDB.transferDataToDatabase(sensorDictionary);
+
 
         int port;
         try {
@@ -60,6 +60,7 @@ public class ChatServer extends WebSocketServer {
             port = 9000;
         }
         new ChatServer(port).start();
+        System.out.println("Server start...");
     }
 
     /**
@@ -132,14 +133,21 @@ public class ChatServer extends WebSocketServer {
      * @throws Exception exceptions.
      */
     private Message messageProcessor(Message msg) throws Exception {
-        // Brute force search.
-        SearchResult bruteForceSearchResult = BruteForce.search(msg.getData());
-        msg.setSearchResults(bruteForceSearchResult);
+        if(GenericValidator.isDate(msg.getData(),"yyyy-mm-dd",true)) {
+            String date = msg.getData();
+            SearchResult searchResult = new MongoDB("smartwatch").mongoSearch(date);
+            msg.setType(MessageType.DATABASE);
+            msg.setSearchResults(searchResult);
+            return msg;
+        } else {
+            // Brute force search.
+            SearchResult bruteForceSearchResult = BruteForce.search(msg.getData());
+            msg.setSearchResults(bruteForceSearchResult);
 
-        // Lucene Search.
-        SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt").luceneSearch(msg.getData());
-        msg.setSearchResults(luceneSearchResult);
-
+            // Lucene Search.
+            SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt").luceneSearch(msg.getData());
+            msg.setSearchResults(luceneSearchResult);
+        }
         return msg;
     }
 
