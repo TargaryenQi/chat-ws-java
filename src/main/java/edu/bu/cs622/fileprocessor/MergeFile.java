@@ -1,7 +1,9 @@
 package edu.bu.cs622.fileprocessor;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class MergeFile {
@@ -9,7 +11,8 @@ public class MergeFile {
    * @param fromPathname the target file that you want to read from
    * @param toPathname   the destination file that you want to write to
    */
-  public static void mergeDirectoryToSingleFile(String fromPathname,String toPathname){
+  public static void mergeDirectoryToSingleFile(String fromPathname,String toPathname) throws IOException {
+    BufferedWriter bufferedWriter = null;
     try{
       // If the target file has already been there, clear its content.
       // In case generate duplicate data.
@@ -21,42 +24,45 @@ public class MergeFile {
 
       if(listOfFiles == null)
         return;
+
+      bufferedWriter = new BufferedWriter(new FileWriter(toPathname));
       for (int i = 0; i < listOfFiles.length; i++) {
         if(listOfFiles[i].isFile()) {
           mergeZipFileToSingleFile(fromPathname + File.separator + listOfFiles[i].getName(),
-              toPathname);
+              bufferedWriter);
         }
       }
     } catch (Exception ex) {
       ex.printStackTrace();
+    } finally {
+      if(bufferedWriter != null) {
+        bufferedWriter.close();
+      }
     }
   }
 
   /**
    *
    * @param zipFilePath the file folder which contains zip files inside you want to read from
-   * @param toFilePath the file that you want to write in
    */
-  private static void mergeZipFileToSingleFile(String zipFilePath, String toFilePath) {
-    byte[] buffer = new byte[4096];
+  private static void mergeZipFileToSingleFile(String zipFilePath, BufferedWriter bufferedWriter) {
     try{
-      ZipInputStream in = new ZipInputStream(new FileInputStream(zipFilePath));
-      ZipEntry zip = in.getNextEntry();
-
-      File targetFile = new File(toFilePath);
-
-      FileOutputStream out = new FileOutputStream(targetFile,true);
-
-      while(zip != null) {
-        int length;
-        while((length = in.read(buffer)) > 0) {
-          out.write(buffer,0,length);
+      ZipFile zipFile = new ZipFile(zipFilePath);
+      ZipInputStream inputStream = new ZipInputStream(new FileInputStream(zipFilePath));
+      ZipEntry zipEntry = inputStream.getNextEntry();
+      while(zipEntry != null) {
+        InputStream input = zipFile.getInputStream(zipEntry);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+        String line = bufferedReader.readLine();
+        while(line != null) {
+          if(line.startsWith("{"))
+            bufferedWriter.write(line + "\n");
+          line = bufferedReader.readLine();
         }
-        zip = in.getNextEntry();
+        zipEntry = inputStream.getNextEntry();
       }
-      out.close();
-      in.closeEntry();
-      in.close();
+      inputStream.closeEntry();
+      inputStream.close();
     } catch (Exception ex) {
       ex.printStackTrace();
     }

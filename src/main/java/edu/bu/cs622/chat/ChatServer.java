@@ -4,6 +4,7 @@ package edu.bu.cs622.chat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.bu.cs622.db.MongoDB;
+import edu.bu.cs622.fileprocessor.MergeFile;
 import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
@@ -38,9 +39,9 @@ public class ChatServer extends WebSocketServer {
         users = new HashMap<>();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Merge all the data to "merged.txt".
-//        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
+        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
 
         //Preparse the data to a dictionary.
         //      Key: Sensor Name.
@@ -50,7 +51,7 @@ public class ChatServer extends WebSocketServer {
         // Create a mongoDB
         MongoDB mongoDB = new MongoDB("smartwatch");
         // Transfer all the data to the mongoDB
-//        mongoDB.transferDataToDatabase(sensorDictionary);
+        mongoDB.transferDataToDatabase(sensorDictionary);
 
         int port;
         try {
