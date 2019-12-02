@@ -32,10 +32,13 @@ public class ChatServer extends WebSocketServer {
 
     private Set<WebSocket> connections;
 
+    private User simpleBot;
+
     private ChatServer(int port) {
         super(new InetSocketAddress(port));
         connections = new HashSet<>();
         users = new HashMap<>();
+        simpleBot = new User("Simple Bot");
     }
 
     public static void main(String[] args) throws IOException {
@@ -80,7 +83,9 @@ public class ChatServer extends WebSocketServer {
 
             switch (msg.getType()) {
                 case USER_JOINED:
-                    addUser(new User(msg.getUser().getName()), conn);
+                    User user = new User(msg.getUser().getName());
+                    addUser(user, conn);
+                    broadcastWelcomeForUserJoin(user);
                     break;
                 case USER_LEFT:
                     removeUser(conn);
@@ -105,11 +110,7 @@ public class ChatServer extends WebSocketServer {
     private void processAndBroadcastMessage(Message msg) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            User user = msg.getUser();
-            // Get the name of the user who make the query.
-            String userName = msg.getUser().getName();
-            // Note the title to show which user ask for the query.
-            user.setName("Answer for " + userName);
+            msg.setUser(simpleBot);
             // Search message with different type search.
             Message messageProcessed = messageProcessor(msg);
 
@@ -117,8 +118,6 @@ public class ChatServer extends WebSocketServer {
             for (WebSocket sock : connections) {
                 sock.send(messageJson);
             }
-
-            user.setName(userName);
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
         } catch (Exception e) {
@@ -149,22 +148,6 @@ public class ChatServer extends WebSocketServer {
             msg.setSearchResults(luceneSearchResult);
         }
         return msg;
-    }
-
-    /**
-     * Broadcast msg before process it.
-     * @param msg msg to broadcast.
-     */
-    private void broadcastMessage(Message msg) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String messageJson = mapper.writeValueAsString(msg);
-            for (WebSocket sock : connections) {
-                sock.send(messageJson);
-            }
-        } catch (JsonProcessingException e) {
-            logger.error("Cannot convert message to json.");
-        }
     }
 
     /**
@@ -216,6 +199,35 @@ public class ChatServer extends WebSocketServer {
         newMessage.setData(data);
         newMessage.setType(messageType);
         broadcastMessage(newMessage);
+    }
+
+    /**
+     * The Simple Bot will sent an welcome message when a new User join.
+     * @param user new User.
+     * @throws JsonProcessingException exceptions.
+     */
+    private void broadcastWelcomeForUserJoin(User user) throws JsonProcessingException {
+        Message message = new Message();
+        message.setData("Welcome " + user.getName() + "! What do you want to search?");
+        message.setUser(simpleBot);
+        message.setType(MessageType.WELCOME);
+        broadcastMessage(message);
+    }
+
+    /**
+     * Broadcast msg before process it.
+     * @param msg msg to broadcast.
+     */
+    private void broadcastMessage(Message msg) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String messageJson = mapper.writeValueAsString(msg);
+            for (WebSocket sock : connections) {
+                sock.send(messageJson);
+            }
+        } catch (JsonProcessingException e) {
+            logger.error("Cannot convert message to json.");
+        }
     }
 
     @Override
