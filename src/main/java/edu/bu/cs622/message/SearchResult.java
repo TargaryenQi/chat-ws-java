@@ -1,6 +1,9 @@
 package edu.bu.cs622.message;
 
+import edu.bu.cs622.user.User;
+
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class SearchResult {
   private SearchType searchType;
@@ -33,5 +36,33 @@ public class SearchResult {
 
   public void setTimeConsuming(long timeConsuming) {
     this.timeConsuming = timeConsuming;
+  }
+
+  public int getResultNumber() {
+    return resultNumber;
+  }
+
+  public ArrayList<String> getResults() {
+    return results;
+  }
+
+  public long getTimeConsuming() {
+    return timeConsuming;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(searchType,resultNumber,timeConsuming);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if(null == o || o.getClass() != this.getClass()) return false;
+
+    SearchResult other = (SearchResult) o;
+
+    return Objects.equals(this.searchType, other.searchType) && Objects.equals(this.resultNumber, other.resultNumber)
+        &&Objects.equals(this.timeConsuming,other.timeConsuming);
   }
 }

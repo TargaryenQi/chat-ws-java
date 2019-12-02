@@ -22,12 +22,10 @@ public class BruteForce {
       String line = null;
 
       line = reader.readLine();
-      System.out.println("Brute force Search begins!");
       System.out.println("Brute force Search for " + queryItem);
       while (line != null) {
 
         if(line.contains(queryItem))  {
-          System.out.println(line);
           result.add(line);
         }
         line = reader.readLine();
@@ -42,6 +40,7 @@ public class BruteForce {
     searchResult.setResultNumber(result.size());
     searchResult.setResults(result);
     searchResult.setTimeConsuming(timeConsuming);
+    System.out.println("Brute force results number:" + result.size());
     return searchResult;
   }
 

@@ -52,7 +52,7 @@ public class Lucene {
     this.fileName = fileName;
   }
 
-  public SearchResult LuceneSearch(String target) throws IOException, ParseException {
+  public SearchResult luceneSearch(String target) throws IOException, ParseException {
     processFile();
     return query(target);
   }
@@ -102,6 +102,8 @@ public class Lucene {
     searchResult.setResultNumber(hits.length);
     searchResult.setTimeConsuming(timeConsuming);
     searchResult.setResults(results);
+    System.out.println("Lucene Search for " + target);
+    System.out.println("Lucene search result number:" + hits.length);
     return searchResult;
   }
 
