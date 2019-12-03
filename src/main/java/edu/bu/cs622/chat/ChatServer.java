@@ -21,6 +21,7 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +30,8 @@ public class ChatServer extends WebSocketServer {
 
     private final static Logger logger = LogManager.getLogger(ChatServer.class);
 
-    private HashMap<WebSocket, User> users;
+//    private HashMap<WebSocket, User> users;
+    private HashMap<User,WebSocket> users;
 
     private Set<WebSocket> connections;
 
@@ -92,14 +94,16 @@ public class ChatServer extends WebSocketServer {
                 case USER_JOINED:
                     User user = new User(msg.getUser().getName());
                     addUser(user, conn);
-                    broadcastWelcomeForUserJoin(user);
+//                    broadcastWelcomeForUserJoin(user);
                     break;
                 case USER_LEFT:
                     removeUser(conn);
                     break;
                 case TEXT_MESSAGE:
-                    broadcastMessage(msg);
-                    processAndBroadcastMessage(msg);
+//                    broadcastMessage(msg);
+                    sendMessage(msg,conn);
+//                    processAndBroadcastMessage(msg);
+                    processAndSendMessage(msg,conn);
             }
 
             System.out.println(
@@ -136,6 +140,28 @@ public class ChatServer extends WebSocketServer {
     }
 
     /**
+     * Search msg with different type search and broadcast the msg with search result.
+     *
+     * @param msg msg to be searched.
+     */
+    private void processAndSendMessage(Message msg,WebSocket socket) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            msg.setUser(simpleBot);
+            // Search message with different type search.
+            Message messageProcessed = messageProcessor(msg);
+
+            String messageJson = mapper.writeValueAsString(messageProcessed);
+
+            socket.send(messageJson);
+        } catch (JsonProcessingException e) {
+            logger.error("Cannot convert message to json.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Search with different type search.
      *
      * @param msg msg to search.
@@ -143,22 +169,22 @@ public class ChatServer extends WebSocketServer {
      * @throws Exception exceptions.
      */
     private Message messageProcessor(Message msg) throws Exception {
-        if (GenericValidator.isDate(msg.getData(), "yyyy-mm-dd", true)) {
-            String date = msg.getData();
-            SearchResult searchResult = new MongoDB("smartwatch").mongoSearch(date);
-            msg.setType(MessageType.DATABASE);
-            msg.setSearchResults(searchResult);
-            return msg;
-        } else {
-            // Brute force search.
-            SearchResult bruteForceSearchResult = BruteForce.search(msg.getData());
-            msg.setSearchResults(bruteForceSearchResult);
-
-            // Lucene Search.
-            SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt")
-                .luceneSearch(msg.getData());
-            msg.setSearchResults(luceneSearchResult);
-        }
+//        if (GenericValidator.isDate(msg.getData(), "yyyy-mm-dd", true)) {
+//            String date = msg.getData();
+//            SearchResult searchResult = new MongoDB("smartwatch").mongoSearch(date);
+//            msg.setType(MessageType.DATABASE);
+//            msg.setSearchResults(searchResult);
+//            return msg;
+//        } else {
+//            // Brute force search.
+//            SearchResult bruteForceSearchResult = BruteForce.search(msg.getData());
+//            msg.setSearchResults(bruteForceSearchResult);
+//
+//            // Lucene Search.
+//            SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt")
+//                .luceneSearch(msg.getData());
+//            msg.setSearchResults(luceneSearchResult);
+//        }
         return msg;
     }
 
@@ -170,8 +196,7 @@ public class ChatServer extends WebSocketServer {
      * @throws JsonProcessingException exception.
      */
     private void addUser(User user, WebSocket conn) throws JsonProcessingException {
-        users.put(conn, user);
-
+        users.put(user, conn);
         acknowledgeUserJoined(user, conn);
         broadcastUserActivityMessage(MessageType.USER_JOINED);
     }
@@ -244,6 +269,16 @@ public class ChatServer extends WebSocketServer {
             for (WebSocket sock : connections) {
                 sock.send(messageJson);
             }
+        } catch (JsonProcessingException e) {
+            logger.error("Cannot convert message to json.");
+        }
+    }
+
+    private void sendMessage(Message msg, WebSocket socket) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String messageJson = mapper.writeValueAsString(msg);
+            socket.send(messageJson);
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
         }
