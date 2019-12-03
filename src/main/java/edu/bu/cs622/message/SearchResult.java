@@ -8,17 +8,17 @@ import java.util.Objects;
 public class SearchResult {
   private SearchType searchType;
   private int resultNumber;
-  private ArrayList<String> results;
+  private String result;
   private long timeConsuming;
 
   public SearchResult(SearchType searchType) {
     this.searchType = searchType;
   }
 
-  public SearchResult(SearchType searchType, int resultNumber, ArrayList<String> results, long timeConsuming) {
+  public SearchResult(SearchType searchType, int resultNumber, String results, long timeConsuming) {
     this.searchType = searchType;
     this.resultNumber = resultNumber;
-    this.results = results;
+    this.result = results;
     this.timeConsuming = timeConsuming;
   }
 
@@ -30,8 +30,8 @@ public class SearchResult {
     this.resultNumber = resultNumber;
   }
 
-  public void setResults(ArrayList<String> results) {
-    this.results = results;
+  public void setResults(String results) {
+    this.result = results;
   }
 
   public void setTimeConsuming(long timeConsuming) {
@@ -42,8 +42,8 @@ public class SearchResult {
     return resultNumber;
   }
 
-  public ArrayList<String> getResults() {
-    return results;
+  public String getResults() {
+    return result;
   }
 
   public long getTimeConsuming() {

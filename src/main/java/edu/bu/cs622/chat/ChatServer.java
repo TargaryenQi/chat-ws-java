@@ -3,8 +3,16 @@ package edu.bu.cs622.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.bu.cs622.db.BruteForce;
+import edu.bu.cs622.db.DBSearch;
+import edu.bu.cs622.db.Lucene;
+import edu.bu.cs622.db.MongoDB;
+import edu.bu.cs622.db.MysqlDAO;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
+import edu.bu.cs622.message.SearchResult;
+import edu.bu.cs622.message.SearchType;
 import edu.bu.cs622.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +22,9 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -161,6 +172,151 @@ public class ChatServer extends WebSocketServer {
      * @throws Exception exceptions.
      */
     private Message messageProcessor(Message msg) throws Exception {
+		msg.setType(MessageType.TEXT_MESSAGE);
+    	String str = msg.getData();
+    	String QType = null;
+    	String date;
+    	if(str.contains("How many") || str.contains("How many")) {
+    		if(str.contains("steps"))
+    			QType = "Activity";
+    		else
+    			QType = "HeartRate";
+    	}
+    	else if(str.contains("Did") || str.contains("Do")) {
+    		QType = "ActivFit";
+    	}
+    	else
+    		QType = "Wrong";
+    	date = str.substring(str.indexOf("'") + 1, str.indexOf("'",str.indexOf("'")+1));
+    	if(QType.equals("Wrong") || !isValidDate(date))
+    		msg.setSearchResults(null);
+    	else {
+    		if(QType.equals("Activity")) {			
+    			// brute force search result
+    			BruteForce bfSearch = new BruteForce();
+    			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
+    			int number = bfSearch.howManyStepsOnOneDay(date);
+    			if(number > 0)
+    				bfst.setResults(String.valueOf(number));
+    			else
+    				bfst.setResults("0");
+    			msg.setSearchResults(bfst);
+    			
+    			// lucene search result
+    			Lucene luceneSearch = new Lucene("filename");
+    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			number = luceneSearch.howManyStepsOnOneDay(date);
+    			if(number > 0)
+    				lucenest.setResults(String.valueOf(number));
+    			else
+    				lucenest.setResults("0");
+    			msg.setSearchResults(lucenest);
+    			
+    			// mongoDb search result
+    			DBSearch mongoDbSearch = new MongoDB("smartwatch");
+    			SearchResult mongoDbst = new SearchResult(SearchType.MONGODB);
+    			number = mongoDbSearch.howManyStepsOnOneDay(date);
+    			if(number > 0)
+    				mongoDbst.setResults(String.valueOf(number));
+    			else
+    				mongoDbst.setResults("0");
+    			msg.setSearchResults(mongoDbst);
+    			
+    			// mysql search result
+    			DBSearch mysqlSearch = new MysqlDAO();
+    			SearchResult mysqlst = new SearchResult(SearchType.MYSQL);
+    			number = mysqlSearch.howManyStepsOnOneDay(date);
+    			if(number > 0)
+    				mysqlst.setResults(String.valueOf(number));
+    			else
+    				mysqlst.setResults("0");
+    			msg.setSearchResults(mysqlst);
+    		}
+    		else if(QType.equals("HeartRate"))
+    		{
+    			// brute force search result
+    			BruteForce bfSearch = new BruteForce();
+    			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
+    			int number = bfSearch.howManyHeartRateRecords(date);
+    			if(number > 0)
+    				bfst.setResults(String.valueOf(number));
+    			else
+    				bfst.setResults("0");
+    			msg.setSearchResults(bfst);
+    			
+    			// lucene search result
+    			Lucene luceneSearch = new Lucene("filename");
+    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			number = luceneSearch.howManyHeartRateRecords(date);
+    			if(number > 0)
+    				lucenest.setResults(String.valueOf(number));
+    			else
+    				lucenest.setResults("0");
+    			msg.setSearchResults(lucenest);
+    			
+    			// mongoDb search result
+    			DBSearch mongoDbSearch = new MongoDB("smartwatch");
+    			SearchResult mongoDbst = new SearchResult(SearchType.MONGODB);
+    			number = mongoDbSearch.howManyHeartRateRecords(date);
+    			if(number > 0)
+    				mongoDbst.setResults(String.valueOf(number));
+    			else
+    				mongoDbst.setResults("0");
+    			msg.setSearchResults(mongoDbst);
+    			
+    			// mysql search result
+    			DBSearch mysqlSearch = new MysqlDAO();
+    			SearchResult mysqlst = new SearchResult(SearchType.MYSQL);
+    			number = mysqlSearch.howManyHeartRateRecords(date);
+    			if(number > 0)
+    				mysqlst.setResults(String.valueOf(number));
+    			else
+    				mysqlst.setResults("0");
+    			msg.setSearchResults(mysqlst);
+    		}
+    		else if(QType.equals("ActivFit"))
+    		{
+    			// brute force search result
+    			BruteForce bfSearch = new BruteForce();
+    			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
+    			boolean number = bfSearch.AreThereRunningEvent(date);
+    			if(number)
+    				bfst.setResults("Yes, you ran.");
+    			else
+    				bfst.setResults("No");
+    			msg.setSearchResults(bfst);
+    			
+    			// lucene search result
+    			Lucene luceneSearch = new Lucene("filename");
+    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			number = luceneSearch.AreThereRunningEvent(date);
+    			if(number)
+    				lucenest.setResults("Yes, you ran.");
+    			else
+    				lucenest.setResults("No");
+    			msg.setSearchResults(lucenest);
+    			
+    			// mongoDb search result
+    			DBSearch mongoDbSearch = new MongoDB("smartwatch");
+    			SearchResult mongoDbst = new SearchResult(SearchType.MONGODB);
+    			number = mongoDbSearch.AreThereRunningEvent(date);
+    			if(number)
+    				mongoDbst.setResults("Yes, you ran.");
+    			else
+    				mongoDbst.setResults("No");
+    			msg.setSearchResults(mongoDbst);
+    			
+    			// mysql search result
+    			DBSearch mysqlSearch = new MysqlDAO();
+    			SearchResult mysqlst = new SearchResult(SearchType.MYSQL);
+    			number = mysqlSearch.AreThereRunningEvent(date);
+    			if(number)
+    				mysqlst.setResults("Yes, you ran.");
+    			else
+    				mysqlst.setResults("No");
+    			msg.setSearchResults(mysqlst);
+    		}
+    	}
 //        if (GenericValidator.isDate(msg.getData(), "yyyy-mm-dd", true)) {
 //            String date = msg.getData();
 //            SearchResult searchResult = new MongoDB("smartwatch").mongoSearch(date);
@@ -310,4 +466,14 @@ public class ChatServer extends WebSocketServer {
         System.out
             .println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
     }
+    
+	public static boolean isValidDate(String str) {
+		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		try{
+			Date date = (Date)formatter.parse(str);
+			return str.equals(formatter.format(date));
+		}catch(Exception e){
+			return false;
+		}
+	}
 }
