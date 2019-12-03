@@ -319,7 +319,7 @@ public class MongoDB {
     }
   }
 
-  private String convertToDate(String date) {
+  public static String convertToDate(String date) {
     java.util.Date utilDate = new java.util.Date(date);
     String pattern = "yyyy-MM-dd";
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
@@ -327,7 +327,7 @@ public class MongoDB {
     return Date;
   }
 
-  private String convertToTime(String date) {
+  public static String convertToTime(String date) {
     java.util.Date utilDate = new java.util.Date(date);
     String pattern2 = "HH:mm:ss";
     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(pattern2);

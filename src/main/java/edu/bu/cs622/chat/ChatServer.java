@@ -4,6 +4,8 @@ package edu.bu.cs622.chat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.bu.cs622.db.MongoDB;
+import edu.bu.cs622.fileprocessor.MergeFile;
+import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
 import edu.bu.cs622.message.SearchResult;
@@ -44,17 +46,17 @@ public class ChatServer extends WebSocketServer {
     public static void main(String[] args) throws IOException {
         // Merge all the data to "merged.txt".
 //        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
-
-        //Preparse the data to a dictionary.
-        //      Key: Sensor Name.
-        //      Value: an arrayList of the JSON string of particular Sensor
-//        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile.preParseFile("MergedData/allDaysData.txt");
-
-        // Create a mongoDB
+//
+//        //Preparse the data to a dictionary.
+//        //      Key: Sensor Name.
+//        //      Value: an arrayList of the JSON string of particular Sensor
+//        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile
+//            .preParseFile("MergedData/allDaysData.txt");
+//
+//        // Create a mongoDB
 //        MongoDB mongoDB = new MongoDB("smartwatch");
-        // Transfer all the data to the mongoDB
+//        // Transfer all the data to the mongoDB
 //        mongoDB.transferDataToDatabase(sensorDictionary);
-
 
         int port;
         try {
@@ -67,10 +69,9 @@ public class ChatServer extends WebSocketServer {
     }
 
     /**
-     * On receive different type message and react with different actions.
-     *      USER_JOINED: add user and connection;
-     *      USER_LEFT: remove user and connection;
-     *      TEXT_MESSAGE: broadcast msg, search msg and broadcast search result.
+     * On receive different type message and react with different actions. USER_JOINED: add user and
+     * connection; USER_LEFT: remove user and connection; TEXT_MESSAGE: broadcast msg, search msg
+     * and broadcast search result.
      *
      * @param conn connection between client and server.
      * @param message message received from client.
@@ -95,7 +96,9 @@ public class ChatServer extends WebSocketServer {
                     processAndBroadcastMessage(msg);
             }
 
-            System.out.println("Message from user: " + msg.getUser() + ", text: " + msg.getData() + ", type:" + msg.getType());
+            System.out.println(
+                "Message from user: " + msg.getUser() + ", text: " + msg.getData() + ", type:" + msg
+                    .getType());
             logger.info("Message from user: " + msg.getUser() + ", text: " + msg.getData());
         } catch (IOException e) {
             logger.error("Wrong message format.");
@@ -105,6 +108,7 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Search msg with different type search and broadcast the msg with search result.
+     *
      * @param msg msg to be searched.
      */
     private void processAndBroadcastMessage(Message msg) {
@@ -127,12 +131,13 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Search with different type search.
+     *
      * @param msg msg to search.
      * @return msg with search results from different type search.
      * @throws Exception exceptions.
      */
     private Message messageProcessor(Message msg) throws Exception {
-        if(GenericValidator.isDate(msg.getData(),"yyyy-mm-dd",true)) {
+        if (GenericValidator.isDate(msg.getData(), "yyyy-mm-dd", true)) {
             String date = msg.getData();
             SearchResult searchResult = new MongoDB("smartwatch").mongoSearch(date);
             msg.setType(MessageType.DATABASE);
@@ -144,7 +149,8 @@ public class ChatServer extends WebSocketServer {
             msg.setSearchResults(bruteForceSearchResult);
 
             // Lucene Search.
-            SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt").luceneSearch(msg.getData());
+            SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt")
+                .luceneSearch(msg.getData());
             msg.setSearchResults(luceneSearchResult);
         }
         return msg;
@@ -152,6 +158,7 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Add user.
+     *
      * @param user user to add.
      * @param conn connection to create.
      * @throws JsonProcessingException exception.
@@ -165,6 +172,7 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Remove user.
+     *
      * @param conn connection to remove.
      * @throws JsonProcessingException exception.
      */
@@ -175,6 +183,7 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Inform the client that the User has been added to server.
+     *
      * @param user user that added.
      * @param conn connection that established.
      * @throws JsonProcessingException exceptions.
@@ -188,10 +197,12 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Broadcast the user activity.
+     *
      * @param messageType messageType which represent the User activity.
      * @throws JsonProcessingException exception.
      */
-    private void broadcastUserActivityMessage(MessageType messageType) throws JsonProcessingException {
+    private void broadcastUserActivityMessage(MessageType messageType)
+        throws JsonProcessingException {
         Message newMessage = new Message();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -203,6 +214,7 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * The Simple Bot will sent an welcome message when a new User join.
+     *
      * @param user new User.
      * @throws JsonProcessingException exceptions.
      */
@@ -216,6 +228,7 @@ public class ChatServer extends WebSocketServer {
 
     /**
      * Broadcast msg before process it.
+     *
      * @param msg msg to broadcast.
      */
     private void broadcastMessage(Message msg) {
@@ -234,8 +247,10 @@ public class ChatServer extends WebSocketServer {
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
         connections.add(webSocket);
 
-        logger.info("Connection established from: " + webSocket.getRemoteSocketAddress().getHostString());
-        System.out.println("New connection from " + webSocket.getRemoteSocketAddress().getAddress().getHostAddress());
+        logger.info(
+            "Connection established from: " + webSocket.getRemoteSocketAddress().getHostString());
+        System.out.println("New connection from " + webSocket.getRemoteSocketAddress().getAddress()
+            .getHostAddress());
     }
 
     @Override
@@ -249,7 +264,8 @@ public class ChatServer extends WebSocketServer {
         }
 
         logger.info("Connection closed to: " + conn.getRemoteSocketAddress().getHostString());
-        System.out.println("Closed connection to " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
+        System.out.println(
+            "Closed connection to " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
     }
 
     @Override
@@ -258,6 +274,7 @@ public class ChatServer extends WebSocketServer {
             connections.remove(conn);
         }
         assert conn != null;
-        System.out.println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
+        System.out
+            .println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
     }
 }
