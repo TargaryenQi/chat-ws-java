@@ -3,16 +3,9 @@ package edu.bu.cs622.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.bu.cs622.db.MongoDB;
-import edu.bu.cs622.fileprocessor.MergeFile;
-import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
-import edu.bu.cs622.message.SearchResult;
-import edu.bu.cs622.search.BruteForce;
-import edu.bu.cs622.search.Lucene;
 import edu.bu.cs622.user.User;
-import org.apache.commons.validator.GenericValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.WebSocket;
@@ -21,7 +14,6 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;

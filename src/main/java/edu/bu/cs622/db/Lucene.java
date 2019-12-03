@@ -1,4 +1,4 @@
-package edu.bu.cs622.search;
+package edu.bu.cs622.db;
 
 import edu.bu.cs622.message.SearchResult;
 import edu.bu.cs622.message.SearchType;
