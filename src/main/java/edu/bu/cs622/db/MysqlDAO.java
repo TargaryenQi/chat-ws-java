@@ -6,10 +6,10 @@ import javax.sql.rowset.CachedRowSet;
 /**
  * Created by Sichi Zhang on 2019/12/3.
  */
-public class MysqlDAO {
+public class MysqlDAO implements DBSearch {
 
 
-    public static int howManyStepsOnOneDay(String date) {
+    public int howManyStepsOnOneDay(String date) {
         String sql = "SELECT step_counts FROM activity_step "
             + "WHERE date = ? ORDER BY step_counts DESC LIMIT 1";
         Object[] param = new Object[]{date};
@@ -25,7 +25,7 @@ public class MysqlDAO {
         return count;
     }
 
-    public static boolean AreThereRunningEvent(String date) {
+    public boolean AreThereRunningEvent(String date) {
         String sql = "select 1 from activity where event = 'running' and date = ? limit 1;";
         Object[] param = new Object[]{date};
         CachedRowSet crs = MySqlUtil.select(sql, param);
@@ -39,7 +39,8 @@ public class MysqlDAO {
         }
         return flag;
     }
-    public static int howManyHeartRateRecords(String date) {
+
+    public int howManyHeartRateRecords(String date) {
         String sql = "SELECT count(1) FROM heart_rate WHERE date = ? ";
         Object[] param = new Object[]{date};
         CachedRowSet crs = MySqlUtil.select(sql, param);
