@@ -108,6 +108,11 @@
             <version>1.6</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.sql</groupId>
+            <artifactId>rowset</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
     </dependencies>
 

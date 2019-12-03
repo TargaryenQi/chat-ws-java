@@ -39,7 +39,14 @@ public class ChatServer extends WebSocketServer {
         super(new InetSocketAddress(port));
         connections = new HashSet<>();
         users = new HashMap<>();
-        simpleBot = new User("Simple Bot");
+        simpleBot = createSimpleBot();
+    }
+
+    private User createSimpleBot() {
+        if(simpleBot == null) {
+            simpleBot = new User("Simple Bot");
+        }
+        return simpleBot;
     }
 
     public static void main(String[] args) throws IOException {
