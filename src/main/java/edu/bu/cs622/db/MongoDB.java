@@ -5,8 +5,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import edu.bu.cs622.message.SearchResult;
-import edu.bu.cs622.message.SearchType;
 import org.bson.Document;
 import org.json.JSONObject;
 
@@ -17,7 +15,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class MongoDB {
+public class MongoDB implements DBSearch{
   private MongoClient mongoClient;
   private MongoDatabase mongoDatabase;
 
@@ -32,46 +30,20 @@ public class MongoDB {
     System.out.println("[Mongo]: " + mongoDatabase.getName() + " database is initialized.");
   }
 
-  /**
-   * MongoDB search.
-   * @param date search date.
-   * @return search result.
-   */
-  public SearchResult mongoSearch(String date) {
-    SearchResult searchResult = new SearchResult(SearchType.MONGODB);
-    ArrayList<String> results = new ArrayList<>();
-    long start = System.currentTimeMillis();
-    String runningData = checkRunOrNotInCertainDay(date);
-    String stepsData =  getTotalStepsInCertainDay(date);
-    String heartRateData = getCountOfHeartRateInCertainDay(date);
-    long end = System.currentTimeMillis();
-    results.add(runningData);
-    results.add(stepsData);
-    results.add(heartRateData);
-    searchResult.setResultNumber(3);
-    searchResult.setTimeConsuming(end - start);
-    searchResult.setResults(results);
-    return searchResult;
-  }
-
-  /**
-   * Count the number of heart-rate the user has received on his/her smartwatch in a particular day.
-   * @param date date that you want to query.
-   * @return heart-rate count on that day as an int.
-   */
-  public String getCountOfHeartRateInCertainDay(String date) {
+  @Override
+  public int howManyStepsOnOneDay(String date) {
     int count = 0;
-    MongoCollection<Document> collection = mongoDatabase.getCollection("HeartRate");
+    MongoCollection<Document> collection = mongoDatabase.getCollection("ActivityStepCount");
     BasicDBObject queryObject = new BasicDBObject();
     queryObject.put("date",date);
     FindIterable<Document> documents = collection.find(queryObject);
     if(documents.first() == null) {
-      return "There is no heart-rate data received on " + date + ".";
+      return 0;
     }
     for(Document document : documents) {
-      count += Integer.parseInt(document.get("bpm").toString());
+      count += Integer.parseInt(document.get("step_delta").toString());
     }
-    return "Number of heart-rate received on " + date + " is " + count + ".";
+    return count;
   }
 
   /**
@@ -79,68 +51,42 @@ public class MongoDB {
    * @param date the date to query.
    * @return true: there is running event; false: no running event.
    */
-  public String checkRunOrNotInCertainDay(String date) {
-    boolean run = false;
-    StringBuilder result = new StringBuilder();
+  @Override
+  public boolean AreThereRunningEvent(String date) {
     MongoCollection<Document> collection = mongoDatabase.getCollection("ActivityDuration");
     BasicDBObject queryObject = new BasicDBObject();
     queryObject.put("date",date);
     FindIterable<Document> documents = collection.find(queryObject);
     if(documents.first() == null) {
-      return "There is no activity data received on " + date + ".";
+      return false;
     }
     for(Document document : documents) {
       if(document.get("activity").equals("running")) {
-        String start = document.get("start_time").toString();
-        String end = document.get("end_time").toString();
-        result.append("Yes, you ran from ").append(start).append(" to ").append(end).append(" on ").append(date).append(";");
-        run = true;
+        return true;
       }
     }
-    if(!run) {
-      return "No, there is no running on " + date + ".";
-    }
-    return result.toString();
+    return false;
   }
 
   /**
-   * Get the total amount of steps the user took in certain day.
-   * @param date the date to query.
-   * @return number of steps as an int.
+   * Count the number of heart-rate the user has received on his/her smartwatch in a particular day.
+   * @param date date that you want to query.
+   * @return heart-rate count on that day as an int.
    */
-  public String getTotalStepsInCertainDay(String date) {
+  @Override
+  public int howManyHeartRateRecords(String date) {
     int count = 0;
-    MongoCollection<Document> collection = mongoDatabase.getCollection("ActivityStepCount");
+    MongoCollection<Document> collection = mongoDatabase.getCollection("HeartRate");
     BasicDBObject queryObject = new BasicDBObject();
     queryObject.put("date",date);
     FindIterable<Document> documents = collection.find(queryObject);
     if(documents.first() == null) {
-      return "There is no step data received on " + date + ".";
+      return 0;
     }
     for(Document document : documents) {
-      count += Integer.parseInt(document.get("step_delta").toString());
+      count += Integer.parseInt(document.get("bpm").toString());
     }
-    return "The user walked " + count + " steps on " + date + "." ;
-  }
-
-  /**
-   * List its collections.
-   */
-  public void printCollections() {
-    for (String name : mongoDatabase.listCollectionNames()) {
-      System.out.println("Collections inside this db:"+name);
-    }
-  }
-
-  /**
-   * List all the documents in certain collection.
-   * @param collectionName the collection you want to read.
-   */
-  public void printDocumentOfCertainCollection(String collectionName) {
-    MongoCollection<Document> col = mongoDatabase.getCollection(collectionName);
-    for (Document document : col.find()) {
-      System.out.println("docs inside the col:" + document);
-    }
+    return count;
   }
 
   /**
