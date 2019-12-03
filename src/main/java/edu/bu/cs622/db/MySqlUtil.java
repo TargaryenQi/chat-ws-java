@@ -36,7 +36,7 @@ public class MySqlUtil {
         boolean isSucceed = false;
         Connection conn = getConnection();
         try {
-            System.out.println("sql:"+sql);
+            System.out.println("sql:" + sql);
 
             PreparedStatement ps = conn.prepareStatement(sql);
             isSucceed = ps.execute();
@@ -53,8 +53,7 @@ public class MySqlUtil {
     public static CachedRowSet select(String sql) throws SQLException {
         CachedRowSet crs = null;
         try {
-            System.out.println("sql:"+sql);
-
+            System.out.println("sql:" + sql);
             crs = new CachedRowSetImpl();
             Connection conn = getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -73,10 +72,10 @@ public class MySqlUtil {
     public static CachedRowSet select(String sql, Object[] params) {
         CachedRowSet crs = null;
         try {
-            System.out.println("sql:"+sql);
+            System.out.println("sql:" + sql);
             System.out.print("Params: ");
-            for(Object param: params) {
-                System.out.print(" "+param);
+            for (Object param : params) {
+                System.out.print(" " + param);
             }
             System.out.println("");
             crs = new CachedRowSetImpl();
@@ -96,14 +95,14 @@ public class MySqlUtil {
         return crs;
     }
 
-    public static boolean dosql(String sql,Object[] params) {
+    public static boolean dosql(String sql, Object[] params) {
         boolean isSucceed = false;
         Connection conn = getConnection();
         try {
-            System.out.println("sql:"+sql);
+            System.out.println("sql:" + sql);
             System.out.print("Params: ");
-            for(Object param: params) {
-                System.out.print(param+" ");
+            for (Object param : params) {
+                System.out.print(param + " ");
             }
             System.out.println("");
             PreparedStatement ps = conn.prepareStatement(sql);
