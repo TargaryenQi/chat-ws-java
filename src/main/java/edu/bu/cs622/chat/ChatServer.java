@@ -23,6 +23,7 @@ import org.java_websocket.server.WebSocketServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -31,9 +32,9 @@ import java.util.regex.Pattern;
 public class ChatServer extends WebSocketServer {
 
 	private final static Logger logger = LogManager.getLogger(ChatServer.class);
-  private static MongoDB mongoDB;
+	private static MongoDB mongoDB;
 
-  private HashMap<User, WebSocket> users;
+	private HashMap<User, WebSocket> users;
 
 	private Set<WebSocket> connections;
 
@@ -162,8 +163,9 @@ public class ChatServer extends WebSocketServer {
 			}
 			// date = str.substring(str.indexOf("'") + 1,
 			// str.indexOf("'",str.indexOf("'")+1));
-			if (!isValidDate(date)) {
-				msg.setData("Wrong date formart.");
+			date = isValidDate(date);
+			if (date.equals("")) {
+				msg.setData("Invalid input.");
 				return msg;
 			}
 			if (QType.equals("Activity")) {
@@ -440,13 +442,23 @@ public class ChatServer extends WebSocketServer {
 		System.out.println("ERROR from " + conn.getRemoteSocketAddress().getAddress().getHostAddress());
 	}
 
-	public static boolean isValidDate(String str) {
+	public static String isValidDate(String str) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			str = dateFormat.format(dateFormat.parse(str));
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			return "";
+		}
 		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		try {
+			formatter.setLenient(false);
 			Date date = (Date) formatter.parse(str);
-			return str.equals(formatter.format(date));
+			if (str.equals(formatter.format(date)))
+				return str;
+			return "";
 		} catch (Exception e) {
-			return false;
+			return "";
 		}
 	}
 }
