@@ -172,6 +172,7 @@ public class ChatServer extends WebSocketServer {
      * @throws Exception exceptions.
      */
     private Message messageProcessor(Message msg) throws Exception {
+		long startTime, endTime, elapsedTime;
 		msg.setType(MessageType.TEXT_MESSAGE);
     	String str = msg.getData();
     	String QType = null;
@@ -195,7 +196,11 @@ public class ChatServer extends WebSocketServer {
     			// brute force search result
     			BruteForce bfSearch = new BruteForce();
     			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
+    			startTime = System.currentTimeMillis();
     			int number = bfSearch.howManyStepsOnOneDay(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			bfst.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				bfst.setResults(String.valueOf(number));
     			else
@@ -205,7 +210,11 @@ public class ChatServer extends WebSocketServer {
     			// lucene search result
     			Lucene luceneSearch = new Lucene("filename");
     			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			startTime = System.currentTimeMillis();
     			number = luceneSearch.howManyStepsOnOneDay(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			lucenest.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				lucenest.setResults(String.valueOf(number));
     			else
@@ -215,7 +224,11 @@ public class ChatServer extends WebSocketServer {
     			// mongoDb search result
     			DBSearch mongoDbSearch = new MongoDB("smartwatch");
     			SearchResult mongoDbst = new SearchResult(SearchType.MONGODB);
+    			startTime = System.currentTimeMillis();
     			number = mongoDbSearch.howManyStepsOnOneDay(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			mongoDbst.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				mongoDbst.setResults(String.valueOf(number));
     			else
@@ -225,7 +238,11 @@ public class ChatServer extends WebSocketServer {
     			// mysql search result
     			DBSearch mysqlSearch = new MysqlDAO();
     			SearchResult mysqlst = new SearchResult(SearchType.MYSQL);
+    			startTime = System.currentTimeMillis();
     			number = mysqlSearch.howManyStepsOnOneDay(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			mysqlst.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				mysqlst.setResults(String.valueOf(number));
     			else
@@ -237,7 +254,11 @@ public class ChatServer extends WebSocketServer {
     			// brute force search result
     			BruteForce bfSearch = new BruteForce();
     			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
+    			startTime = System.currentTimeMillis();
     			int number = bfSearch.howManyHeartRateRecords(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			bfst.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				bfst.setResults(String.valueOf(number));
     			else
@@ -247,7 +268,11 @@ public class ChatServer extends WebSocketServer {
     			// lucene search result
     			Lucene luceneSearch = new Lucene("filename");
     			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			startTime = System.currentTimeMillis();
     			number = luceneSearch.howManyHeartRateRecords(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			lucenest.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				lucenest.setResults(String.valueOf(number));
     			else
@@ -257,7 +282,11 @@ public class ChatServer extends WebSocketServer {
     			// mongoDb search result
     			DBSearch mongoDbSearch = new MongoDB("smartwatch");
     			SearchResult mongoDbst = new SearchResult(SearchType.MONGODB);
+    			startTime = System.currentTimeMillis();
     			number = mongoDbSearch.howManyHeartRateRecords(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			mongoDbst.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				mongoDbst.setResults(String.valueOf(number));
     			else
@@ -267,7 +296,11 @@ public class ChatServer extends WebSocketServer {
     			// mysql search result
     			DBSearch mysqlSearch = new MysqlDAO();
     			SearchResult mysqlst = new SearchResult(SearchType.MYSQL);
+    			startTime = System.currentTimeMillis();
     			number = mysqlSearch.howManyHeartRateRecords(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			mysqlst.setTimeConsuming(elapsedTime);
     			if(number > 0)
     				mysqlst.setResults(String.valueOf(number));
     			else
@@ -279,7 +312,11 @@ public class ChatServer extends WebSocketServer {
     			// brute force search result
     			BruteForce bfSearch = new BruteForce();
     			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
+    			startTime = System.currentTimeMillis();
     			boolean number = bfSearch.AreThereRunningEvent(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			bfst.setTimeConsuming(elapsedTime);
     			if(number)
     				bfst.setResults("Yes, you ran.");
     			else
@@ -289,7 +326,11 @@ public class ChatServer extends WebSocketServer {
     			// lucene search result
     			Lucene luceneSearch = new Lucene("filename");
     			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-    			number = luceneSearch.AreThereRunningEvent(date);
+    			startTime = System.currentTimeMillis();
+    			number = luceneSearch.AreThereRunningEvent(date);	
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			lucenest.setTimeConsuming(elapsedTime);
     			if(number)
     				lucenest.setResults("Yes, you ran.");
     			else
@@ -299,7 +340,11 @@ public class ChatServer extends WebSocketServer {
     			// mongoDb search result
     			DBSearch mongoDbSearch = new MongoDB("smartwatch");
     			SearchResult mongoDbst = new SearchResult(SearchType.MONGODB);
+    			startTime = System.currentTimeMillis();
     			number = mongoDbSearch.AreThereRunningEvent(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			mongoDbst.setTimeConsuming(elapsedTime);
     			if(number)
     				mongoDbst.setResults("Yes, you ran.");
     			else
@@ -309,7 +354,11 @@ public class ChatServer extends WebSocketServer {
     			// mysql search result
     			DBSearch mysqlSearch = new MysqlDAO();
     			SearchResult mysqlst = new SearchResult(SearchType.MYSQL);
+    			startTime = System.currentTimeMillis();
     			number = mysqlSearch.AreThereRunningEvent(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			mysqlst.setTimeConsuming(elapsedTime);
     			if(number)
     				mysqlst.setResults("Yes, you ran.");
     			else
