@@ -1,13 +1,11 @@
 package edu.bu.cs622.db;
 
-import edu.bu.cs622.message.SearchResult;
-import edu.bu.cs622.message.SearchType;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class BruteForce implements DBSearch{
 
@@ -58,13 +56,13 @@ public class BruteForce implements DBSearch{
   public int howManyHeartRateRecords(String date) {
     int count = 0;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/Activity.datanew"));
+      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/HeartRate.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
         if(line.contains(date))  {
           JSONObject jsonObject = new JSONObject(line);
-          count += Integer.parseInt(jsonObject.get("bpm").toString());
+          count += jsonObject.getJSONObject("sensor_data").getInt("bpm");
         }
         line = reader.readLine();
       }
