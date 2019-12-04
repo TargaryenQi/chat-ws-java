@@ -13,7 +13,7 @@ public class BruteForce implements DBSearch{
   public int howManyStepsOnOneDay(String date) {
     int count = 0;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/Activity.datanew"));
+      BufferedReader reader = new BufferedReader(new FileReader("data/Activity.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
@@ -36,7 +36,7 @@ public class BruteForce implements DBSearch{
   public boolean AreThereRunningEvent(String date) {
     boolean result = false;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/ActiviFit.datanew"));
+      BufferedReader reader = new BufferedReader(new FileReader("data/ActiviFit.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
@@ -56,7 +56,7 @@ public class BruteForce implements DBSearch{
   public int howManyHeartRateRecords(String date) {
     int count = 0;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/HeartRate.datanew"));
+      BufferedReader reader = new BufferedReader(new FileReader("data/HeartRate.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {

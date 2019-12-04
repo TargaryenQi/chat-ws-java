@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.bu.cs622.db.BruteForce;
 import edu.bu.cs622.db.DBSearch;
 import edu.bu.cs622.db.LuceneHelper;
+import edu.bu.cs622.db.LuceneSearch;
 import edu.bu.cs622.db.MongoDB;
 import edu.bu.cs622.db.MysqlDAO;
 import edu.bu.cs622.fileprocessor.MergeFile;
@@ -185,19 +186,19 @@ public class ChatServer extends WebSocketServer {
 					bfst.setResult("0");
 				msg.addSearchResult(bfst);
 
-//    			// lucene search result
-//    			Lucene luceneSearch = new Lucene("filename");
-//    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-//    			startTime = System.currentTimeMillis();
-//    			number = luceneSearch.(date);
-//    			endTime = System.currentTimeMillis();
-//    			elapsedTime = endTime - startTime;
-//    			lucenest.setTimeConsuming(elapsedTime);
-//    			if(number > 0)
-//    				lucenest.setResults(String.valueOf(number));
-//    			else
-//    				lucenest.setResults("0");
-//    			msg.addSearchResult(lucenest);
+    			// lucene search result
+    			DBSearch luceneSearch = new LuceneSearch();
+    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			startTime = System.currentTimeMillis();
+    			number = luceneSearch.howManyStepsOnOneDay(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			lucenest.setTimeConsuming(elapsedTime);
+    			if(number > 0)
+    				lucenest.setResult(String.valueOf(number));
+    			else
+    				lucenest.setResult("0");
+    			msg.addSearchResult(lucenest);
 
 				// mongoDb search result
 				DBSearch mongoDbSearch = new MongoDB("smartwatch");
@@ -241,19 +242,19 @@ public class ChatServer extends WebSocketServer {
 					bfst.setResult("0");
 				msg.addSearchResult(bfst);
 
-//    			// lucene search result
-//    			Lucene luceneSearch = new Lucene("filename");
-//    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-//    			startTime = System.currentTimeMillis();
-////    			number = luceneSearch.howManyHeartRateRecords(date);
-//    			endTime = System.currentTimeMillis();
-//    			elapsedTime = endTime - startTime;
-//    			lucenest.setTimeConsuming(elapsedTime);
-//    			if(number > 0)
-//    				lucenest.setResults(String.valueOf(number));
-//    			else
-//    				lucenest.setResults("0");
-//    			msg.addSearchResult(lucenest);
+    			// lucene search result
+				DBSearch luceneSearch = new LuceneSearch();
+    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			startTime = System.currentTimeMillis();
+    			number = luceneSearch.howManyHeartRateRecords(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			lucenest.setTimeConsuming(elapsedTime);
+    			if(number > 0)
+    				lucenest.setResult(String.valueOf(number));
+    			else
+    				lucenest.setResult("0");
+    			msg.addSearchResult(lucenest);
 
 				// mongoDb search result
 				DBSearch mongoDbSearch = new MongoDB("smartwatch");
@@ -297,19 +298,19 @@ public class ChatServer extends WebSocketServer {
 					bfst.setResult("No");
 				msg.addSearchResult(bfst);
 
-//    			// lucene search result
-//    			Lucene luceneSearch = new Lucene("filename");
-//    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-//    			startTime = System.currentTimeMillis();
-//    			number = luceneSearch.AreThereRunningEvent(date);
-//    			endTime = System.currentTimeMillis();
-//    			elapsedTime = endTime - startTime;
-//    			lucenest.setTimeConsuming(elapsedTime);
-//    			if(number)
-//    				lucenest.setResults("Yes, you ran.");
-//    			else
-//    				lucenest.setResults("No");
-//    			msg.addSearchResult(lucenest);
+    			// lucene search result
+				DBSearch luceneSearch = new LuceneSearch();
+    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+    			startTime = System.currentTimeMillis();
+    			number = luceneSearch.AreThereRunningEvent(date);
+    			endTime = System.currentTimeMillis();
+    			elapsedTime = endTime - startTime;
+    			lucenest.setTimeConsuming(elapsedTime);
+    			if(number)
+    				lucenest.setResult("Yes, you ran.");
+    			else
+    				lucenest.setResult("No");
+    			msg.addSearchResult(lucenest);
 
 				// mongoDb search result
 				DBSearch mongoDbSearch = new MongoDB("smartwatch");
