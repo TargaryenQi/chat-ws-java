@@ -10,8 +10,7 @@ public class MysqlDAO implements DBSearch {
 
 
     public int howManyStepsOnOneDay(String date) {
-        String sql = "SELECT step_counts FROM activity_step "
-            + "WHERE date = ? ORDER BY step_counts DESC LIMIT 1";
+        String sql = "SELECT MAX(step_counts) FROM activity_step WHERE date = ?";
         Object[] param = new Object[]{date};
         CachedRowSet crs = MySqlUtil.select(sql, param);
         int count = 0;
