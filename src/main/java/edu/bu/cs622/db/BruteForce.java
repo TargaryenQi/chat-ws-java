@@ -36,7 +36,7 @@ public class BruteForce implements DBSearch{
   public boolean AreThereRunningEvent(String date) {
     boolean result = false;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/ActivityFit.datanew"));
+      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/ActiviFit.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
