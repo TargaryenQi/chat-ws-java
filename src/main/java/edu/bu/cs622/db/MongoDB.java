@@ -5,6 +5,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import edu.bu.cs622.message.Message;
+import edu.bu.cs622.user.User;
 import org.bson.Document;
 import org.json.JSONObject;
 
@@ -101,6 +103,33 @@ public class MongoDB implements DBSearch{
     insertCollectionBattery(sensorDictionary.get("battery"));
     insertCollectionLight(sensorDictionary.get("light"));
     insertCollectionHearRate(sensorDictionary.get("heartrate"));
+  }
+
+  /**
+   * Add message to mongodb.
+   * @param message message to add.
+   * @param user user who owns the message.
+   */
+  public void addToUserHistory(Message message, User user) {
+    MongoCollection<Document> userHistoryCollection = mongoDatabase.getCollection("UserHistory");
+    try {
+        Document document = new Document();
+        document.put("user_name",user.getName());
+        document.put("user_id",user.getId());
+        document.put("data",message.getData());
+        document.put("date",new Date());
+        document.put("message_type",message.getType().toString());
+        if(message.getUser().getName().equals("Simple Bot")) {
+          document.put("response",message.getSearchResults().toString());
+          document.put("from_bot",true);
+        } else {
+          document.put("response",null);
+          document.put("from_bot",false);
+        }
+        userHistoryCollection.insertOne(document);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 
   /**

@@ -23,27 +23,26 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ChatServer extends WebSocketServer {
 
     private final static Logger logger = LogManager.getLogger(ChatServer.class);
 
-//    private HashMap<WebSocket, User> users;
     private HashMap<User,WebSocket> users;
 
     private Set<WebSocket> connections;
 
     private User simpleBot;
 
+    private MongoDB mongoDB;
+
     private ChatServer(int port) {
         super(new InetSocketAddress(port));
         connections = new HashSet<>();
         users = new HashMap<>();
         simpleBot = createSimpleBot();
+        mongoDB = new MongoDB("smartwatch");
     }
 
     private User createSimpleBot() {
@@ -63,8 +62,7 @@ public class ChatServer extends WebSocketServer {
 //        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile
 //            .preParseFile("MergedData/allDaysData.txt");
 //
-//        // Create a mongoDB
-//        MongoDB mongoDB = new MongoDB("smartwatch");
+
 //        // Transfer all the data to the mongoDB
 //        mongoDB.transferDataToDatabase(sensorDictionary);
 
@@ -91,21 +89,22 @@ public class ChatServer extends WebSocketServer {
         ObjectMapper mapper = new ObjectMapper();
         try {
             Message msg = mapper.readValue(message, Message.class);
-
+            // Log message from user to MongoDB.
+            mongoDB.addToUserHistory(msg,msg.getUser());
             switch (msg.getType()) {
                 case USER_JOINED:
                     User user = new User(msg.getUser().getName());
-                    addUser(user, conn);
-//                    broadcastWelcomeForUserJoin(user);
+                    addUserAndSendWelcomeMessage(user, conn);
                     break;
                 case USER_LEFT:
                     removeUser(conn);
                     break;
                 case TEXT_MESSAGE:
-//                    broadcastMessage(msg);
                     sendMessage(msg,conn);
-//                    processAndBroadcastMessage(msg);
-                    processAndSendMessage(msg,conn);
+                    // Most process happened here.
+                    // To validate input, extract usefully info, make the query and send back msg with search result.
+                    // Also log the processed message to MongoDB.
+                    processAndSendAndLogMessage(msg,conn,msg.getUser());
             }
 
             System.out.println(
@@ -119,43 +118,23 @@ public class ChatServer extends WebSocketServer {
     }
 
     /**
-     * Search msg with different type search and broadcast the msg with search result.
+     * Validate user input.
+     * Extract useful data.
+     * Make query.
+     * Send back message.
      *
      * @param msg msg to be searched.
      */
-    private void processAndBroadcastMessage(Message msg) {
+    private void processAndSendAndLogMessage(Message msg, WebSocket conn,User user) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             msg.setUser(simpleBot);
+            msg.setType(MessageType.BOT_RESPONSE);
             // Search message with different type search.
             Message messageProcessed = messageProcessor(msg);
-
+            mongoDB.addToUserHistory(messageProcessed,user);
             String messageJson = mapper.writeValueAsString(messageProcessed);
-            for (WebSocket sock : connections) {
-                sock.send(messageJson);
-            }
-        } catch (JsonProcessingException e) {
-            logger.error("Cannot convert message to json.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Search msg with different type search and broadcast the msg with search result.
-     *
-     * @param msg msg to be searched.
-     */
-    private void processAndSendMessage(Message msg,WebSocket socket) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            msg.setUser(simpleBot);
-            // Search message with different type search.
-            Message messageProcessed = messageProcessor(msg);
-
-            String messageJson = mapper.writeValueAsString(messageProcessed);
-
-            socket.send(messageJson);
+            conn.send(messageJson);
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
         } catch (Exception e) {
@@ -172,7 +151,6 @@ public class ChatServer extends WebSocketServer {
      */
     private Message messageProcessor(Message msg) throws Exception {
 		long startTime, endTime, elapsedTime;
-		msg.setType(MessageType.TEXT_MESSAGE);
     	String str = msg.getData();
     	String QType = null;
     	String date;
@@ -376,16 +354,18 @@ public class ChatServer extends WebSocketServer {
     }
 
     /**
-     * Add user.
+     * Add user both to the server and client.
+     * Send welcome message to the user.
      *
      * @param user user to add.
      * @param conn connection to create.
      * @throws JsonProcessingException exception.
      */
-    private void addUser(User user, WebSocket conn) throws JsonProcessingException {
+    private void addUserAndSendWelcomeMessage(User user, WebSocket conn) throws JsonProcessingException {
         users.put(user, conn);
+        connections.add(conn);
         acknowledgeUserJoined(user, conn);
-        broadcastUserActivityMessage(MessageType.USER_JOINED);
+        sendWelcomeMessage(user,conn);
     }
 
     /**
@@ -395,8 +375,15 @@ public class ChatServer extends WebSocketServer {
      * @throws JsonProcessingException exception.
      */
     private void removeUser(WebSocket conn) throws JsonProcessingException {
-        users.remove(conn);
-        broadcastUserActivityMessage(MessageType.USER_LEFT);
+        Iterator iterator = users.entrySet().iterator();
+        while (iterator.hasNext()) {
+          Map.Entry entry = (Map.Entry) iterator.next();
+          if (conn.equals(entry.getValue())) {
+            iterator.remove();
+            break;
+          }
+        }
+        connections.remove(conn);
     }
 
     /**
@@ -414,58 +401,24 @@ public class ChatServer extends WebSocketServer {
     }
 
     /**
-     * Broadcast the user activity.
-     *
-     * @param messageType messageType which represent the User activity.
-     * @throws JsonProcessingException exception.
-     */
-    private void broadcastUserActivityMessage(MessageType messageType)
-        throws JsonProcessingException {
-        Message newMessage = new Message();
-
-        ObjectMapper mapper = new ObjectMapper();
-        String data = mapper.writeValueAsString(users.values());
-        newMessage.setData(data);
-        newMessage.setType(messageType);
-        broadcastMessage(newMessage);
-    }
-
-    /**
      * The Simple Bot will sent an welcome message when a new User join.
      *
      * @param user new User.
      * @throws JsonProcessingException exceptions.
      */
-    private void broadcastWelcomeForUserJoin(User user) throws JsonProcessingException {
+    private void sendWelcomeMessage(User user,WebSocket conn) throws JsonProcessingException {
         Message message = new Message();
-        message.setData("Welcome " + user.getName() + "! What do you want to search?");
+        message.setData("Welcome " + user.getName() + "! What can I do for you?");
         message.setUser(simpleBot);
         message.setType(MessageType.WELCOME);
-        broadcastMessage(message);
+        conn.send(new ObjectMapper().writeValueAsString(message));
     }
 
-    /**
-     * Broadcast msg before process it.
-     *
-     * @param msg msg to broadcast.
-     */
-    private void broadcastMessage(Message msg) {
+    private void sendMessage(Message msg, WebSocket conn) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String messageJson = mapper.writeValueAsString(msg);
-            for (WebSocket sock : connections) {
-                sock.send(messageJson);
-            }
-        } catch (JsonProcessingException e) {
-            logger.error("Cannot convert message to json.");
-        }
-    }
-
-    private void sendMessage(Message msg, WebSocket socket) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String messageJson = mapper.writeValueAsString(msg);
-            socket.send(messageJson);
+            conn.send(messageJson);
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
         }
