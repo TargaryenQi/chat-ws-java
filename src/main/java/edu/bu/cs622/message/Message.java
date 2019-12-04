@@ -43,7 +43,7 @@ public class Message implements Serializable{
         return searchResults;
     }
 
-    public void setSearchResults(SearchResult searchResult) {
+    public void addSearchResult(SearchResult searchResult) {
         this.searchResults.add(searchResult);
     }
 }

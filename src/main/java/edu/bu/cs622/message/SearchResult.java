@@ -30,7 +30,7 @@ public class SearchResult {
     this.resultNumber = resultNumber;
   }
 
-  public void setResults(String results) {
+  public void setResult(String results) {
     this.result = results;
   }
 

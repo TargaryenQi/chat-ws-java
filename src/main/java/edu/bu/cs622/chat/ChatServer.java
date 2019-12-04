@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.bu.cs622.db.BruteForce;
 import edu.bu.cs622.db.DBSearch;
-import edu.bu.cs622.db.Lucene;
 import edu.bu.cs622.db.MongoDB;
 import edu.bu.cs622.db.MysqlDAO;
 import edu.bu.cs622.message.Message;
@@ -177,7 +176,7 @@ public class ChatServer extends WebSocketServer {
     	String str = msg.getData();
     	String QType = null;
     	String date;
-    	if(str.contains("How many") || str.contains("How many")) {
+    	if(str.contains("How many")) {
     		if(str.contains("steps"))
     			QType = "Activity";
     		else
@@ -188,11 +187,18 @@ public class ChatServer extends WebSocketServer {
     	}
     	else
     		QType = "Wrong";
-    	date = str.substring(str.indexOf("'") + 1, str.indexOf("'",str.indexOf("'")+1));
-    	if(QType.equals("Wrong") || !isValidDate(date))
-    		msg.setSearchResults(null);
+    	if(QType.equals("Wrong")) {
+        msg.setData("Invalid input.");
+        return msg;
+      }
+
     	else {
-    		if(QType.equals("Activity")) {			
+        date = str.substring(str.indexOf("'") + 1, str.indexOf("'",str.indexOf("'")+1));
+        if(!isValidDate(date)) {
+          msg.setData("Invalid input.");
+          return msg;
+        }
+        if(QType.equals("Activity")) {
     			// brute force search result
     			BruteForce bfSearch = new BruteForce();
     			SearchResult bfst = new SearchResult(SearchType.BRUTE_FORCE);
@@ -202,24 +208,24 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			bfst.setTimeConsuming(elapsedTime);
     			if(number > 0)
-    				bfst.setResults(String.valueOf(number));
+    				bfst.setResult(String.valueOf(number));
     			else
-    				bfst.setResults("0");
-    			msg.setSearchResults(bfst);
+    				bfst.setResult("0");
+    			msg.addSearchResult(bfst);
     			
-    			// lucene search result
-    			Lucene luceneSearch = new Lucene("filename");
-    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-    			startTime = System.currentTimeMillis();
-    			number = luceneSearch.howManyStepsOnOneDay(date);
-    			endTime = System.currentTimeMillis();
-    			elapsedTime = endTime - startTime;
-    			lucenest.setTimeConsuming(elapsedTime);
-    			if(number > 0)
-    				lucenest.setResults(String.valueOf(number));
-    			else
-    				lucenest.setResults("0");
-    			msg.setSearchResults(lucenest);
+//    			// lucene search result
+//    			Lucene luceneSearch = new Lucene("filename");
+//    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+//    			startTime = System.currentTimeMillis();
+//    			number = luceneSearch.(date);
+//    			endTime = System.currentTimeMillis();
+//    			elapsedTime = endTime - startTime;
+//    			lucenest.setTimeConsuming(elapsedTime);
+//    			if(number > 0)
+//    				lucenest.setResults(String.valueOf(number));
+//    			else
+//    				lucenest.setResults("0");
+//    			msg.addSearchResult(lucenest);
     			
     			// mongoDb search result
     			DBSearch mongoDbSearch = new MongoDB("smartwatch");
@@ -230,10 +236,10 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			mongoDbst.setTimeConsuming(elapsedTime);
     			if(number > 0)
-    				mongoDbst.setResults(String.valueOf(number));
+    				mongoDbst.setResult(String.valueOf(number));
     			else
-    				mongoDbst.setResults("0");
-    			msg.setSearchResults(mongoDbst);
+    				mongoDbst.setResult("0");
+    			msg.addSearchResult(mongoDbst);
     			
     			// mysql search result
     			DBSearch mysqlSearch = new MysqlDAO();
@@ -244,10 +250,10 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			mysqlst.setTimeConsuming(elapsedTime);
     			if(number > 0)
-    				mysqlst.setResults(String.valueOf(number));
+    				mysqlst.setResult(String.valueOf(number));
     			else
-    				mysqlst.setResults("0");
-    			msg.setSearchResults(mysqlst);
+    				mysqlst.setResult("0");
+    			msg.addSearchResult(mysqlst);
     		}
     		else if(QType.equals("HeartRate"))
     		{
@@ -260,24 +266,24 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			bfst.setTimeConsuming(elapsedTime);
     			if(number > 0)
-    				bfst.setResults(String.valueOf(number));
+    				bfst.setResult(String.valueOf(number));
     			else
-    				bfst.setResults("0");
-    			msg.setSearchResults(bfst);
+    				bfst.setResult("0");
+    			msg.addSearchResult(bfst);
     			
-    			// lucene search result
-    			Lucene luceneSearch = new Lucene("filename");
-    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-    			startTime = System.currentTimeMillis();
-    			number = luceneSearch.howManyHeartRateRecords(date);
-    			endTime = System.currentTimeMillis();
-    			elapsedTime = endTime - startTime;
-    			lucenest.setTimeConsuming(elapsedTime);
-    			if(number > 0)
-    				lucenest.setResults(String.valueOf(number));
-    			else
-    				lucenest.setResults("0");
-    			msg.setSearchResults(lucenest);
+//    			// lucene search result
+//    			Lucene luceneSearch = new Lucene("filename");
+//    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+//    			startTime = System.currentTimeMillis();
+////    			number = luceneSearch.howManyHeartRateRecords(date);
+//    			endTime = System.currentTimeMillis();
+//    			elapsedTime = endTime - startTime;
+//    			lucenest.setTimeConsuming(elapsedTime);
+//    			if(number > 0)
+//    				lucenest.setResults(String.valueOf(number));
+//    			else
+//    				lucenest.setResults("0");
+//    			msg.addSearchResult(lucenest);
     			
     			// mongoDb search result
     			DBSearch mongoDbSearch = new MongoDB("smartwatch");
@@ -288,10 +294,10 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			mongoDbst.setTimeConsuming(elapsedTime);
     			if(number > 0)
-    				mongoDbst.setResults(String.valueOf(number));
+    				mongoDbst.setResult(String.valueOf(number));
     			else
-    				mongoDbst.setResults("0");
-    			msg.setSearchResults(mongoDbst);
+    				mongoDbst.setResult("0");
+    			msg.addSearchResult(mongoDbst);
     			
     			// mysql search result
     			DBSearch mysqlSearch = new MysqlDAO();
@@ -302,10 +308,10 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			mysqlst.setTimeConsuming(elapsedTime);
     			if(number > 0)
-    				mysqlst.setResults(String.valueOf(number));
+    				mysqlst.setResult(String.valueOf(number));
     			else
-    				mysqlst.setResults("0");
-    			msg.setSearchResults(mysqlst);
+    				mysqlst.setResult("0");
+    			msg.addSearchResult(mysqlst);
     		}
     		else if(QType.equals("ActivFit"))
     		{
@@ -318,24 +324,24 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			bfst.setTimeConsuming(elapsedTime);
     			if(number)
-    				bfst.setResults("Yes, you ran.");
+    				bfst.setResult("Yes, you ran.");
     			else
-    				bfst.setResults("No");
-    			msg.setSearchResults(bfst);
+    				bfst.setResult("No");
+    			msg.addSearchResult(bfst);
     			
-    			// lucene search result
-    			Lucene luceneSearch = new Lucene("filename");
-    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
-    			startTime = System.currentTimeMillis();
-    			number = luceneSearch.AreThereRunningEvent(date);	
-    			endTime = System.currentTimeMillis();
-    			elapsedTime = endTime - startTime;
-    			lucenest.setTimeConsuming(elapsedTime);
-    			if(number)
-    				lucenest.setResults("Yes, you ran.");
-    			else
-    				lucenest.setResults("No");
-    			msg.setSearchResults(lucenest);
+//    			// lucene search result
+//    			Lucene luceneSearch = new Lucene("filename");
+//    			SearchResult lucenest = new SearchResult(SearchType.LUCENE);
+//    			startTime = System.currentTimeMillis();
+//    			number = luceneSearch.AreThereRunningEvent(date);
+//    			endTime = System.currentTimeMillis();
+//    			elapsedTime = endTime - startTime;
+//    			lucenest.setTimeConsuming(elapsedTime);
+//    			if(number)
+//    				lucenest.setResults("Yes, you ran.");
+//    			else
+//    				lucenest.setResults("No");
+//    			msg.addSearchResult(lucenest);
     			
     			// mongoDb search result
     			DBSearch mongoDbSearch = new MongoDB("smartwatch");
@@ -346,10 +352,10 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			mongoDbst.setTimeConsuming(elapsedTime);
     			if(number)
-    				mongoDbst.setResults("Yes, you ran.");
+    				mongoDbst.setResult("Yes, you ran.");
     			else
-    				mongoDbst.setResults("No");
-    			msg.setSearchResults(mongoDbst);
+    				mongoDbst.setResult("No");
+    			msg.addSearchResult(mongoDbst);
     			
     			// mysql search result
     			DBSearch mysqlSearch = new MysqlDAO();
@@ -360,29 +366,13 @@ public class ChatServer extends WebSocketServer {
     			elapsedTime = endTime - startTime;
     			mysqlst.setTimeConsuming(elapsedTime);
     			if(number)
-    				mysqlst.setResults("Yes, you ran.");
+    				mysqlst.setResult("Yes, you ran.");
     			else
-    				mysqlst.setResults("No");
-    			msg.setSearchResults(mysqlst);
+    				mysqlst.setResult("No");
+    			msg.addSearchResult(mysqlst);
     		}
     	}
-//        if (GenericValidator.isDate(msg.getData(), "yyyy-mm-dd", true)) {
-//            String date = msg.getData();
-//            SearchResult searchResult = new MongoDB("smartwatch").mongoSearch(date);
-//            msg.setType(MessageType.DATABASE);
-//            msg.setSearchResults(searchResult);
-//            return msg;
-//        } else {
-//            // Brute force search.
-//            SearchResult bruteForceSearchResult = BruteForce.search(msg.getData());
-//            msg.setSearchResults(bruteForceSearchResult);
-//
-//            // Lucene Search.
-//            SearchResult luceneSearchResult = new Lucene("MergedData/allDaysData.txt")
-//                .luceneSearch(msg.getData());
-//            msg.setSearchResults(luceneSearchResult);
-//        }
-        return msg;
+    	return msg;
     }
 
     /**

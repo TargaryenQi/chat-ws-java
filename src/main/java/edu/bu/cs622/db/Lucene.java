@@ -95,13 +95,13 @@ public class Lucene {
     long end = System.currentTimeMillis();
     long timeConsuming = end - start;
 
-    ArrayList<String> results = new ArrayList<>();
-    for(ScoreDoc hit : hits) {
-      results.add(hit.toString());
-    }
+//    ArrayList<String> results = new ArrayList<>();
+//    for(ScoreDoc hit : hits) {
+//      results.add(hit.toString());
+//    }
     searchResult.setResultNumber(hits.length);
     searchResult.setTimeConsuming(timeConsuming);
-    searchResult.setResults(results);
+    searchResult.setResult("lucene search result.");
     System.out.println("Lucene Search for " + target);
     System.out.println("Lucene search result number:" + hits.length);
     return searchResult;
