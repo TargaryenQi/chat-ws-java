@@ -22,10 +22,12 @@ public class ParseFileForMysqlImport {
 
     public static void main(String[] args) {
         insertHeartRate();
+        insertActivi();
+        insertActiviFit();
     }
 
     public static void insertActiviFit() {
-        File data = new File("./data/ActiviFit.data");
+        File data = new File("/Users/hannbial/Documents/GitHub/chat-ws-java/data/ActiviFit.data");
         try {
             BufferedReader br = new BufferedReader(new FileReader(data));
             String line;
@@ -57,7 +59,7 @@ public class ParseFileForMysqlImport {
     }
 
     public static void insertActivi() {
-        File data = new File("./data/Activity.data");
+        File data = new File("/Users/hannbial/Documents/GitHub/chat-ws-java/data/Activity.data");
         try {
             BufferedReader br = new BufferedReader(new FileReader(data));
             String line;
@@ -85,7 +87,7 @@ public class ParseFileForMysqlImport {
     }
 
     public static void insertHeartRate() {
-        File data = new File("./data/HeartRate.data");
+        File data = new File("/Users/hannbial/Documents/GitHub/chat-ws-java/data/HeartRate.data");
         try {
             BufferedReader br = new BufferedReader(new FileReader(data));
             String line;
