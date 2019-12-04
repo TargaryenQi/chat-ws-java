@@ -24,8 +24,8 @@ public class SearchResult {
     return searchType;
   }
 
-  public void setResult(String results) {
-    this.result = results;
+  public void setResult(String result) {
+    this.result = result;
   }
 
   public void setTimeConsuming(long timeConsuming) {
@@ -33,7 +33,7 @@ public class SearchResult {
   }
 
 
-  public String getResults() {
+  public String getResult() {
     return result;
   }
 

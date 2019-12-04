@@ -7,6 +7,8 @@ import edu.bu.cs622.db.BruteForce;
 import edu.bu.cs622.db.DBSearch;
 import edu.bu.cs622.db.MongoDB;
 import edu.bu.cs622.db.MysqlDAO;
+import edu.bu.cs622.fileprocessor.MergeFile;
+import edu.bu.cs622.fileprocessor.ParseFile;
 import edu.bu.cs622.message.Message;
 import edu.bu.cs622.message.MessageType;
 import edu.bu.cs622.message.SearchResult;
@@ -29,14 +31,13 @@ import java.util.regex.Pattern;
 public class ChatServer extends WebSocketServer {
 
 	private final static Logger logger = LogManager.getLogger(ChatServer.class);
+  private static MongoDB mongoDB;
 
-	private HashMap<User, WebSocket> users;
+  private HashMap<User, WebSocket> users;
 
 	private Set<WebSocket> connections;
 
 	private User simpleBot;
-
-	private MongoDB mongoDB;
 
 	private ChatServer(int port) {
 		super(new InetSocketAddress(port));
@@ -54,19 +55,6 @@ public class ChatServer extends WebSocketServer {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// Merge all the data to "merged.txt".
-//        MergeFile.mergeDirectoryToSingleFile("SampleUserSmartwatch", "MergedData/allDaysData.txt");
-//
-//        //Preparse the data to a dictionary.
-//        //      Key: Sensor Name.
-//        //      Value: an arrayList of the JSON string of particular Sensor
-//        HashMap<String, ArrayList<String>> sensorDictionary = ParseFile
-//            .preParseFile("MergedData/allDaysData.txt");
-//
-
-//        // Transfer all the data to the mongoDB
-//        mongoDB.transferDataToDatabase(sensorDictionary);
-
 		int port;
 		try {
 			port = Integer.parseInt(System.getenv("PORT"));

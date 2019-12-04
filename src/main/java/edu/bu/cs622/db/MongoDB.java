@@ -35,7 +35,7 @@ public class MongoDB implements DBSearch{
   @Override
   public int howManyStepsOnOneDay(String date) {
     int count = 0;
-    MongoCollection<Document> collection = mongoDatabase.getCollection("ActivityStepCount");
+    MongoCollection<Document> collection = mongoDatabase.getCollection("Activity");
     BasicDBObject queryObject = new BasicDBObject();
     queryObject.put("date",date);
     FindIterable<Document> documents = collection.find(queryObject);
@@ -55,7 +55,7 @@ public class MongoDB implements DBSearch{
    */
   @Override
   public boolean AreThereRunningEvent(String date) {
-    MongoCollection<Document> collection = mongoDatabase.getCollection("ActivityDuration");
+    MongoCollection<Document> collection = mongoDatabase.getCollection("ActiviFit");
     BasicDBObject queryObject = new BasicDBObject();
     queryObject.put("date",date);
     FindIterable<Document> documents = collection.find(queryObject);

@@ -25,8 +25,9 @@ public class ParseFileForMongoImport {
 
     public static void insertActiviFit(MongoDatabase MongoDatabase) {
         MongoCollection<Document> collectionActiviFit = MongoDatabase.getCollection("ActiviFit");
+         File file = new File("/Users/hannbial/Documents/GitHub/chat-ws-java/data/ActiviFit.data");
         try {
-            BufferedReader br = new BufferedReader(new FileReader("./data/ActiviFit.data"));
+            BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             while ((line = br.readLine()) != null) {
                 //Match the target line
@@ -65,7 +66,7 @@ public class ParseFileForMongoImport {
 
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/Activity.data"));
+            BufferedReader br = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/Activity.data"));
             String line;
             while ((line = br.readLine()) != null) {
                 //Match the target line
@@ -97,7 +98,7 @@ public class ParseFileForMongoImport {
     public static void insertHeartRate(MongoDatabase MongoDatabase) {
         MongoCollection<Document> collectionHeartRate = MongoDatabase.getCollection("HeartRate");
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data/HeartRate.data"));
+            BufferedReader br = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/HeartRate.data"));
             String line;
             while ((line = br.readLine()) != null) {
                 //Match the target line
