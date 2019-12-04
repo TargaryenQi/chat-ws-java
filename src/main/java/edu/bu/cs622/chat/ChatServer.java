@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.bu.cs622.db.BruteForce;
 import edu.bu.cs622.db.DBSearch;
+import edu.bu.cs622.db.LuceneHelper;
 import edu.bu.cs622.db.MongoDB;
 import edu.bu.cs622.db.MysqlDAO;
 import edu.bu.cs622.fileprocessor.MergeFile;
@@ -46,6 +47,7 @@ public class ChatServer extends WebSocketServer {
 		users = new HashMap<>();
 		simpleBot = createSimpleBot();
 		mongoDB = new MongoDB("smartwatch");
+		LuceneHelper.createIndex();
 	}
 
 	private User createSimpleBot() {
