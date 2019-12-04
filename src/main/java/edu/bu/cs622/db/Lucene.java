@@ -99,7 +99,6 @@ public class Lucene {
 //    for(ScoreDoc hit : hits) {
 //      results.add(hit.toString());
 //    }
-    searchResult.setResultNumber(hits.length);
     searchResult.setTimeConsuming(timeConsuming);
     searchResult.setResult("lucene search result.");
     System.out.println("Lucene Search for " + target);

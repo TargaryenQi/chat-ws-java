@@ -14,14 +14,14 @@ import javax.sql.rowset.CachedRowSet;
 public class MySqlUtil {
 
     static final String user = "root";
-    static final String pwd = "1234";
+    static final String pwd = "root";
 
     private static Connection getConnection() {
         Connection conn = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager
-                .getConnection("jdbc:mysql://localhost:3306/met622", "root", "1234");
+                .getConnection("jdbc:mysql://localhost:3306/met622", user, pwd);
             return conn;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();

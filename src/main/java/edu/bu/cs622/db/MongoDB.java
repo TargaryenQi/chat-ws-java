@@ -132,6 +132,7 @@ public class MongoDB implements DBSearch{
     }
   }
 
+
   /**
    * Insert data of Sensor Activity to database.
    * @param data arrayList of JSON string of Sensor Activity.
@@ -320,6 +321,10 @@ public class MongoDB implements DBSearch{
     } else {
       System.out.println("[Mongo]: Close failure.");
     }
+  }
+
+  public MongoDatabase getMongoDatabase() {
+    return mongoDatabase;
   }
 }
 

@@ -7,7 +7,6 @@ import java.util.Objects;
 
 public class SearchResult {
   private SearchType searchType;
-  private int resultNumber;
   private String result;
   private long timeConsuming;
 
@@ -15,19 +14,14 @@ public class SearchResult {
     this.searchType = searchType;
   }
 
-  public SearchResult(SearchType searchType, int resultNumber, String results, long timeConsuming) {
+  public SearchResult(SearchType searchType, String result, long timeConsuming) {
     this.searchType = searchType;
-    this.resultNumber = resultNumber;
-    this.result = results;
+    this.result = result;
     this.timeConsuming = timeConsuming;
   }
 
   public SearchType getSearchType() {
     return searchType;
-  }
-
-  public void setResultNumber(int resultNumber) {
-    this.resultNumber = resultNumber;
   }
 
   public void setResult(String results) {
@@ -38,9 +32,6 @@ public class SearchResult {
     this.timeConsuming = timeConsuming;
   }
 
-  public int getResultNumber() {
-    return resultNumber;
-  }
 
   public String getResults() {
     return result;
@@ -52,7 +43,7 @@ public class SearchResult {
 
   @Override
   public int hashCode() {
-    return Objects.hash(searchType,resultNumber,timeConsuming);
+    return Objects.hash(searchType,timeConsuming,result);
   }
 
   @Override
@@ -62,7 +53,7 @@ public class SearchResult {
 
     SearchResult other = (SearchResult) o;
 
-    return Objects.equals(this.searchType, other.searchType) && Objects.equals(this.resultNumber, other.resultNumber)
+    return Objects.equals(this.searchType, other.searchType) && Objects.equals(this.result, other.result)
         &&Objects.equals(this.timeConsuming,other.timeConsuming);
   }
 }
