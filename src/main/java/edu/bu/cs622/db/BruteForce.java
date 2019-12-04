@@ -61,8 +61,7 @@ public class BruteForce implements DBSearch{
       line = reader.readLine();
       while (line != null) {
         if(line.contains(date))  {
-          JSONObject jsonObject = new JSONObject(line);
-          count += jsonObject.getJSONObject("sensor_data").getInt("bpm");
+          count ++;
         }
         line = reader.readLine();
       }
