@@ -16,7 +16,7 @@ public class MysqlDAO implements DBSearch {
         int count = 0;
         try {
             while (crs.next()) {
-                count = crs.getInt("step_counts");
+                count = crs.getInt("MAX(step_counts)");
             }
         } catch (SQLException e) {
             e.printStackTrace();
