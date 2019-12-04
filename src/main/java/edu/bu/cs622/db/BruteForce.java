@@ -1,13 +1,11 @@
 package edu.bu.cs622.db;
 
-import edu.bu.cs622.message.SearchResult;
-import edu.bu.cs622.message.SearchType;
+
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class BruteForce implements DBSearch{
 
@@ -15,7 +13,7 @@ public class BruteForce implements DBSearch{
   public int howManyStepsOnOneDay(String date) {
     int count = 0;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("data/Activity.data"));
+      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/Activity.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
@@ -38,7 +36,7 @@ public class BruteForce implements DBSearch{
   public boolean AreThereRunningEvent(String date) {
     boolean result = false;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("data/ActivityFit.data"));
+      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/ActiviFit.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
@@ -58,13 +56,12 @@ public class BruteForce implements DBSearch{
   public int howManyHeartRateRecords(String date) {
     int count = 0;
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("data/Activity.data"));
+      BufferedReader reader = new BufferedReader(new FileReader("/Users/hannbial/Documents/GitHub/chat-ws-java/data/HeartRate.datanew"));
       String line = null;
       line = reader.readLine();
       while (line != null) {
         if(line.contains(date))  {
-          JSONObject jsonObject = new JSONObject(line);
-          count += Integer.parseInt(jsonObject.get("bpm").toString());
+          count ++;
         }
         line = reader.readLine();
       }

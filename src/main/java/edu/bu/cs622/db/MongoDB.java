@@ -86,7 +86,7 @@ public class MongoDB implements DBSearch{
       return 0;
     }
     for(Document document : documents) {
-      count += Integer.parseInt(document.get("bpm").toString());
+      count ++;
     }
     return count;
   }
